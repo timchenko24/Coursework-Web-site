@@ -1,6 +1,7 @@
 from flask import render_template, flash, redirect, Response, url_for, session, logging, request
 from app import app
 from app.forms import RegisterForm
+from app.support import get_user_status
 from app.db_connection import connect_to_db
 import hashlib
 
@@ -33,3 +34,47 @@ def register():
         flash('You are now registered', 'success')
         return redirect(url_for('index'))
     return render_template('register.html', form=form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password_form = request.form['password']
+        md5_pass = hashlib.md5(password_form.encode('utf-8')).hexdigest()
+
+        conn, cursor, last_id = connect_to_db('usersDB', "select id from users")
+        cursor.execute("SELECT * FROM users where username = ?", username)
+        data = cursor.fetchone()
+
+        if data != None:
+            password = data[4]
+
+            if password == md5_pass:
+                session['logged_in'] = True
+                session['username'] = username
+
+                flash('You are now logged in', 'success')
+                return redirect(url_for('index'))
+            else:
+                error = "Invalid password"
+                return render_template('login.html', error=error)
+            cursor.close()
+        else:
+            error = "Username not found"
+            return render_template('login.html', error=error)
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('You are now logged out', 'success')
+    return redirect(url_for('index'))
+
+
+@app.route('/dashboard')
+@get_user_status
+def dashboard():
+    return render_template('dashboard.html')
