@@ -1,6 +1,7 @@
 from flask import render_template, flash, redirect, Response, url_for, session, logging, request
 from app import app
 from app.forms import RegisterForm
+from app.support import get_user_status
 from app.db_connection import connect_to_db
 import hashlib
 
@@ -50,6 +51,8 @@ def login():
             password = data[4]
 
             if password == md5_pass:
+                session['logged_in'] = True
+                session['username'] = username
 
                 flash('You are now logged in', 'success')
                 return redirect(url_for('index'))
@@ -62,3 +65,16 @@ def login():
             return render_template('login.html', error=error)
 
     return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('You are now logged out', 'success')
+    return redirect(url_for('index'))
+
+
+@app.route('/dashboard')
+@get_user_status
+def dashboard():
+    return render_template('dashboard.html')
