@@ -16,5 +16,15 @@
                 <a href="#" class="nav-link">Page 2</a>
             </li>
         </ul>
+
+        <ul class="nav navbar-nav navbar-right">
+            {% if session.logged_in == True %}
+                <li><a href="/logout" class="nav-link">Logout</a></li>
+                <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+            {% else %}
+                <li><a href="/register" class="nav-link">Register</a></li>
+                <li><a href="/login" class="nav-link">Sign In</a></li>
+            {% endif %}
+        </ul>
     </div>
 </nav>
