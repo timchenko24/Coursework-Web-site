@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, Response, url_for, session, 
 from app import app
 from app.forms import RegisterForm
 from app.support import get_user_status
-from app.db_connection import connect_to_db
+from app.db_connection import connect_to_db, get_df_from_db
 import hashlib
 
 
@@ -78,3 +78,10 @@ def logout():
 @get_user_status
 def dashboard():
     return render_template('dashboard.html')
+
+
+@app.route('/client/index')
+def client_index():
+    df = get_df_from_db('TestDB', 'select FIO, Address, Phone, [E-mail] from Client')
+    return render_template("client_table/index.html", tables=[df.to_html(classes='table table-bordered',
+                                                                         border=0, index=False, justify='left')])
