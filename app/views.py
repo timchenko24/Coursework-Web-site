@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, Response, url_for, session, logging, request
 from app import app
-from app.forms import RegisterForm
+from app.forms import RegisterForm, ClientForm
 from app.support import get_user_status
 from app.db_connection import connect_to_db, get_df_from_db
 import hashlib
@@ -22,7 +22,7 @@ def register():
         email = form.email.data
         password = form.password.data
 
-        conn, cursor, last_id = connect_to_db('usersDB', "select id from users")
+        conn, cursor, last_id = connect_to_db('usersDB', 'id', "select id from users")
 
         next_id = last_id + 1
         md5_pass = hashlib.md5(password.encode('utf-8')).hexdigest()
@@ -44,7 +44,7 @@ def login():
         password_form = request.form['password']
         md5_pass = hashlib.md5(password_form.encode('utf-8')).hexdigest()
 
-        conn, cursor, last_id = connect_to_db('usersDB', "select id from users")
+        conn, cursor, last_id = connect_to_db('usersDB', 'id', "select id from users")
         cursor.execute("SELECT * FROM users where username = ?", username)
         data = cursor.fetchone()
 
@@ -84,12 +84,39 @@ def dashboard():
 @app.route('/client/index')
 def client_index():
     df = get_df_from_db('TestDB', 'select FIO, Address, Phone, [E-mail] from Client')
+    df.columns = ['ФИО', 'Адрес', 'Телефон', 'E-mail']
     return render_template("client_table/index.html", tables=[df.to_html(classes='table table-bordered',
                                                                          border=0, index=False, justify='left')])
+
+
+@app.route('/client/add', methods=['GET', 'POST'])
+def client_add():
+    form = ClientForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        fio = form.fio.data
+        address = form.address.data
+        phone = form.phone.data
+        email = form.email.data
+
+        conn, cursor, last_id = connect_to_db('TestDB', 'Client code', "select [Client code] from Client")
+
+        next_id = last_id + 1
+        SQLCommand = ("INSERT INTO Client([Client code], FIO, Address, Phone, [E-mail]) VALUES (?,?,?,?,?)")
+        values = [next_id, fio, address, phone, email]
+        cursor.execute(SQLCommand, values)
+        conn.commit()
+        conn.close()
+
+        flash('Запись добавлена', 'success')
+        return redirect(url_for('index'))
+    return render_template('client_table/add.html', form=form)
+
 
 @app.route('/product/index')
 def product_index():
     df = get_df_from_db('TestDB', 'select Name, Price, Number from Product')
+    df.columns = ['Наименование', 'Цена', 'Кол-во']
     return render_template("product_table/index.html", tables=[df.to_html(classes='table table-bordered',
                                                                          border=0, index=False, justify='left')])
 
