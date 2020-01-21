@@ -23,6 +23,7 @@ class BasicTestCase(unittest.TestCase):
             password=password
         ), follow_redirects=True)
 
+
     def logout(self):
         return self.app.get('/logout', follow_redirects=True)
 
@@ -49,6 +50,7 @@ class BasicTestCase(unittest.TestCase):
         self.assertIn(b'You are now logged in', rv.data)
         rv = self.logout()
         self.assertIn(b'You are now logged out', rv.data)
+
 
     def register(self, name, username, email, password):
         return self.app.post('/register', data=dict(
@@ -81,6 +83,19 @@ class BasicTestCase(unittest.TestCase):
     def test_register5(self):
         rv = self.register('lisa123', 'lisa123', 'lisa123@mail', 'lisa1')
         self.assertIn(b'Field must be between 7 and 20 characters long.', rv.data)
+
+
+    def test_client_page(self):
+        response = self.app.get('/client/index', content_type='html/text')
+        self.assertEqual(response.status_code, 200)
+
+    def test_product_page(self):
+        response = self.app.get('/product/index', content_type='html/text')
+        self.assertEqual(response.status_code, 200)
+
+    def test_sale_page(self):
+        response = self.app.get('/sale/index', content_type='html/text')
+        self.assertEqual(response.status_code, 200)
 
 
 if __name__ == '__main__':
