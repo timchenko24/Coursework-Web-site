@@ -2,8 +2,9 @@ from flask import render_template, flash, redirect, Response, url_for, session, 
 from app import app
 from app.forms import RegisterForm
 from app.support import get_user_status
-from app.db_connection import connect_to_db
+from app.db_connection import connect_to_db, get_df_from_db
 import hashlib
+import pandas as pd
 
 
 @app.route('/')
@@ -78,3 +79,29 @@ def logout():
 @get_user_status
 def dashboard():
     return render_template('dashboard.html')
+
+
+@app.route('/client/index')
+def client_index():
+    df = get_df_from_db('TestDB', 'select FIO, Address, Phone, [E-mail] from Client')
+    return render_template("client_table/index.html", tables=[df.to_html(classes='table table-bordered',
+                                                                         border=0, index=False, justify='left')])
+
+@app.route('/product/index')
+def product_index():
+    df = get_df_from_db('TestDB', 'select Name, Price, Number from Product')
+    return render_template("product_table/index.html", tables=[df.to_html(classes='table table-bordered',
+                                                                         border=0, index=False, justify='left')])
+
+
+@app.route('/sale/index')
+def sale_index():
+    df_sale = get_df_from_db('TestDB', 'select [Product code], [Client code], [Sale date], [Delivery date], Number from Sale')
+    df_client = get_df_from_db('TestDB', 'select [Client code], FIO from Client')
+    df_product = get_df_from_db('TestDB', 'select [Product code], Name from Product')
+
+    df_sale_client = pd.merge(df_sale, df_client, how='right', on='Client code').drop(labels=['Client code'], axis=1)
+    df_result = pd.merge(df_sale_client, df_product, how='left', on='Product code').drop(labels=['Product code'], axis=1)
+    df_result.columns = ['Дата продажи', 'Дата доставки', 'Кол-во', 'ФИО покупателя', 'Товар']
+    return render_template("sale_table/index.html", tables=[df_result.to_html(classes='table table-bordered',
+                                                                         border=0, index=False, justify='left')])
