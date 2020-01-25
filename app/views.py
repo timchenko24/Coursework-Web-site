@@ -139,7 +139,7 @@ def product_add():
         conn.commit()
         conn.close()
 
-        flash('Запись добавлена', 'success')
+        flash('Post added', 'success')
         return redirect(url_for('product_index'))
     return render_template('product_table/add.html', form=form)
 

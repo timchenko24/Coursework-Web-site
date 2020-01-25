@@ -118,5 +118,25 @@ class BasicTestCase(unittest.TestCase):
         rv = self.client_adding('Brandon Rodriguez', '5465 Thornridge Cir', '072-62', 'brandon.rodriguez@example.com')
         self.assertIn(b'Field must be between 7 and 30 characters long', rv.data)
 
+
+    def product_adding(self, name, price, number):
+        return self.app.post('/product/add', data=dict(
+            name=name,
+            price=price,
+            number=number,
+        ), follow_redirects=True)
+
+    def test_product_adding1(self):
+        rv = self.product_adding('Xiaomi DEM-F600', '30', '32')
+        self.assertIn(b'Post added', rv.data)
+
+    def test_product_adding2(self):
+        rv = self.product_adding('Xiaomi DEM-F600', '0', '32')
+        self.assertIn(b'Number must be between 1 and 10000', rv.data)
+
+    def test_product_adding3(self):
+        rv = self.product_adding('Xiaomi DEM-F600', '30', 'thousand')
+        self.assertIn(b'Not a valid integer value', rv.data)
+
 if __name__ == '__main__':
     unittest.main()
