@@ -108,8 +108,8 @@ def client_add():
         conn.commit()
         conn.close()
 
-        flash('Запись добавлена', 'success')
-        return redirect(url_for('index'))
+        flash('Post added', 'success')
+        return redirect(url_for('client_index'))
     return render_template('client_table/add.html', form=form)
 
 

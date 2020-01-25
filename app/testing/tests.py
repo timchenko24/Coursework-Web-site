@@ -98,5 +98,25 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+    def client_adding(self, fio, address, phone, email):
+        return self.app.post('/client/add', data=dict(
+            fio=fio,
+            address=address,
+            phone=phone,
+            email=email,
+        ), follow_redirects=True)
+
+    def test_client_adding1(self):
+        rv = self.client_adding('Brandon Rodriguez', '5465 Thornridge Cir', '072-625-1347', 'brandon.rodriguez@example.com')
+        self.assertIn(b'Post added', rv.data)
+
+    def test_client_adding2(self):
+        rv = self.client_adding('Brandon Rodriguez', '5465 Thornridge Cir', '072-625-1347', 'brandon.rodriguez@example')
+        self.assertIn(b'Invalid email address', rv.data)
+
+    def test_client_adding3(self):
+        rv = self.client_adding('Brandon Rodriguez', '5465 Thornridge Cir', '072-62', 'brandon.rodriguez@example.com')
+        self.assertIn(b'Field must be between 7 and 30 characters long', rv.data)
+
 if __name__ == '__main__':
     unittest.main()
