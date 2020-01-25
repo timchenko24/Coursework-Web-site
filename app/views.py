@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, Response, url_for, session, logging, request
 from app import app
-from app.forms import RegisterForm, ClientForm
+from app.forms import RegisterForm, ClientForm, ProductForm
 from app.support import get_user_status
 from app.db_connection import connect_to_db, get_df_from_db
 import hashlib
@@ -119,6 +119,29 @@ def product_index():
     df.columns = ['Наименование', 'Цена', 'Кол-во']
     return render_template("product_table/index.html", tables=[df.to_html(classes='table table-bordered',
                                                                          border=0, index=False, justify='left')])
+
+
+@app.route('/product/add', methods=['GET', 'POST'])
+def product_add():
+    form = ProductForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        name = form.name.data
+        price = form.price.data
+        number = form.number.data
+
+        conn, cursor, last_id = connect_to_db('TestDB', 'Product code', "select [Product code] from Product")
+
+        next_id = last_id + 1
+        SQLCommand = ("INSERT INTO Product([Product code], Name, Price, Number) VALUES (?,?,?,?)")
+        values = [next_id, name, price, number]
+        cursor.execute(SQLCommand, values)
+        conn.commit()
+        conn.close()
+
+        flash('Запись добавлена', 'success')
+        return redirect(url_for('product_index'))
+    return render_template('product_table/add.html', form=form)
 
 
 @app.route('/sale/index')
