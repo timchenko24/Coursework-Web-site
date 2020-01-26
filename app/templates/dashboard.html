@@ -5,7 +5,11 @@
             <h1>Welcome {{ session.username }}</h1>
         </div>
         <div class="row">
-
+            {% if session.username == 'admin123' %}
+                {% for table in tables %}
+                    {{ table|safe }}
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
 {% endblock %}

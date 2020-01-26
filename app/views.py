@@ -78,7 +78,10 @@ def logout():
 @app.route('/dashboard')
 @get_user_status
 def dashboard():
-    return render_template('dashboard.html')
+    df = get_df_from_db('usersDB', 'select name, username, email from users')
+    df.columns = ['Имя', 'Логин', "E-mail"]
+    return render_template('dashboard.html', tables=[df.to_html(classes='table table-bordered',
+                                                                         border=0, index=False, justify='left')])
 
 
 @app.route('/client/index')
