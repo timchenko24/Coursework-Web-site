@@ -1,4 +1,4 @@
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, IntegerField
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, IntegerField, DateField, SelectField
 from wtforms.validators import Required, DataRequired
 
 
@@ -21,4 +21,10 @@ class ClientForm(Form):
 class ProductForm(Form):
     name = StringField('Наименование', validators=[validators.Length(min=7, max=100)])
     price = IntegerField('Цена', validators=[validators.NumberRange(1, 10000)])
+    number = IntegerField('Кол-во', validators=[validators.NumberRange(1, 1000)])
+
+
+class SaleForm(Form):
+    sale_date = DateField('Дата продажи', format='%Y-%m-%d')
+    delivery_date = DateField('Дата доставки', format='%Y-%m-%d')
     number = IntegerField('Кол-во', validators=[validators.NumberRange(1, 1000)])
