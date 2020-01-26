@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, Response, url_for, session, logging, request
 from app import app
-from app.forms import RegisterForm, ClientForm, ProductForm
+from app.forms import RegisterForm, ClientForm, ProductForm, SaleForm
 from app.support import get_user_status
 from app.db_connection import connect_to_db, get_df_from_db
 import hashlib
@@ -108,7 +108,7 @@ def client_add():
         conn.commit()
         conn.close()
 
-        flash('Запись добавлена', 'success')
+        flash('Post added', 'success')
         return redirect(url_for('client_index'))
     return render_template('client_table/add.html', form=form)
 
@@ -139,7 +139,7 @@ def product_add():
         conn.commit()
         conn.close()
 
-        flash('Запись добавлена', 'success')
+        flash('Post added', 'success')
         return redirect(url_for('product_index'))
     return render_template('product_table/add.html', form=form)
 
@@ -155,3 +155,35 @@ def sale_index():
     df_result.columns = ['Дата продажи', 'Дата доставки', 'Кол-во', 'ФИО покупателя', 'Товар']
     return render_template("sale_table/index.html", tables=[df_result.to_html(classes='table table-bordered',
                                                                          border=0, index=False, justify='left')])
+
+
+@app.route('/sale/add', methods=['GET', 'POST'])
+def sale_add():
+    form = SaleForm(request.form)
+
+    df_client = get_df_from_db('TestDB', 'select [Client code], FIO from Client')
+    df_product = get_df_from_db('TestDB', 'select [Product code], Name from Product')
+
+    products = df_product['Name']
+    clients = df_client['FIO']
+
+    if request.method == 'POST' and form.validate():
+        product = pd.Index(products).get_loc(request.form['product']) + 1
+        client = pd.Index(clients).get_loc(request.form['client']) + 1
+        sale_date = form.sale_date.data
+        delivery_date = form.delivery_date.data
+        number = form.number.data
+
+        conn, cursor, last_id = connect_to_db('TestDB', 'Sale code', "select [Sale code] from Sale")
+
+        next_id = last_id + 1
+        SQLCommand = ("INSERT INTO Sale([Sale code], [Product code], [Client code], [Sale date],"
+                      "[Delivery date], Number) VALUES (?,?,?,?,?,?)")
+        values = [next_id, product, client, sale_date, delivery_date, number]
+        cursor.execute(SQLCommand, values)
+        conn.commit()
+        conn.close()
+
+        flash('Post added', 'success')
+        return redirect(url_for('sale_index'))
+    return render_template('sale_table/add.html', form=form, products=products, clients=clients)
