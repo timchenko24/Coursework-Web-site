@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">Добавление новой Продажи</div>
+                    <div class="card-body">
+                        {% from "_formhelpers.html" import render_field %}
+                        <form method="post" action="">
+                            <div class="form-group row">
+                                <label class="col-md-4 col-form-label text-md-right">Название товара</label>
+                                <div class="col-md-6">
+                                    <select class="custom-select" name="product">
+                                        {% for p in products %}
+                                            <option value="{{ p }}">{{ p }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-md-4 col-form-label text-md-right">Имя клиента</label>
+                                <div class="col-md-6">
+                                    <select class="custom-select" name="client">
+                                        {% for c in clients %}
+                                            <option value="{{ c }}">{{ c }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                {{ render_field(form.sale_date, class="form-control") }}
+                            </div>
+                            <div class="form-group row">
+                                {{ render_field(form.delivery_date, class="form-control") }}
+                            </div>
+                            <div class="form-group row">
+                                {{ render_field(form.number, class="form-control") }}
+                            </div>
+                            <div class="col-md-6 offset-md-4">
+                                <input type="submit" class="btn btn-primary" value="Добавить">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
