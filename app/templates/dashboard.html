@@ -4,8 +4,27 @@
         <div class="row">
             <h1>Welcome {{ session.username }}</h1>
         </div>
+        {% if session.username == 'admin123' %}
         <div class="row">
-
+            {% for table in tables %}
+                {{ table|safe }}
+            {% endfor %}
         </div>
+        <div class="row mt-5">
+            {% from "_formhelpers.html" import render_field %}
+            <form class="form-inline" method="post" action="">
+                <div class="form-group mb-2">
+                    <label class="col-form-label text-md-right">{{ form.query.label }}</label>
+                </div>
+                <div class="form-group mx-sm-3 mb-2">
+                    {{ form.query(class='form-control', cols='60') }}
+                </div>
+                <input type="submit" class="btn btn-primary" value="Выполнить">
+            </form>
+        </div>
+        <div class="row mt-5">
+            {{ dataframe|safe }}
+        </div>
+        {% endif %}
     </div>
 {% endblock %}

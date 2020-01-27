@@ -5,7 +5,9 @@
             {% for table in tables %}
                 {{ table|safe }}
             {% endfor %}
-            <a href="/sale/add" class="btn btn-primary">Добавить</a>
+            {% if session.username == 'admin123' %}
+                <a href="/sale/add" class="btn btn-primary">Добавить</a>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
