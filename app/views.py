@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, Response, url_for, session, logging, request
 from app import app
-from app.forms import RegisterForm, ClientForm, ProductForm, SaleForm
+from app.forms import RegisterForm, ClientForm, ProductForm, SaleForm, QueryForm
 from app.support import get_user_status
 from app.db_connection import connect_to_db, get_df_from_db
 import hashlib
@@ -75,10 +75,27 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET', 'POST'])
 @get_user_status
 def dashboard():
-    return render_template('dashboard.html')
+    form = QueryForm(request.form)
+    df = get_df_from_db('usersDB', 'select name, username, email from users')
+    df.columns = ['Имя', 'Логин', "E-mail"]
+
+    if request.method == 'GET':
+        return render_template('dashboard.html', tables=[df.to_html(classes='table table-bordered',
+                                                                    border=0, index=False, justify='left')],
+                               form=form)
+
+    if request.method == 'POST':
+        query = form.query.data
+
+        df_query = get_df_from_db('TestDB', query)
+        return render_template('dashboard.html', tables=[df.to_html(classes='table table-bordered',
+                                                                    border=0, index=False, justify='left')],
+                               dataframe=df_query.to_html(classes='table table-bordered',
+                                                          border=0, index=False, justify='left'),
+                               form=form)
 
 
 @app.route('/client/index')

@@ -28,3 +28,7 @@ class SaleForm(Form):
     sale_date = DateField('Дата продажи', format='%Y-%m-%d')
     delivery_date = DateField('Дата доставки', format='%Y-%m-%d')
     number = IntegerField('Кол-во', validators=[validators.NumberRange(1, 1000)])
+
+
+class QueryForm(Form):
+    query = TextAreaField('SQL-запрос')
